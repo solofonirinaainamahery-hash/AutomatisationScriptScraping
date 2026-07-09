@@ -64,12 +64,6 @@ TABS = [
     ("playlists", "📋 Playlists"),
 ]
 
-# 🔒 LIMITE AJOUTÉE : nombre maximum de vidéos scrapées PAR ONGLET
-# (videos, shorts, streams, releases, playlists) — chaque onglet est
-# plafonné indépendamment, pas de limite globale par chaîne.
-# ⚠️ Les commentaires (MAX_COMMENTS) ne sont PAS concernés par cette limite.
-MAX_VIDEOS_PER_TAB = 30
-
 # ══════════════════════════════════════════════════════════════════════
 # ⏸️  INTERRUPTEUR — Sociétés sans chaîne YouTube ("web_search")
 # ══════════════════════════════════════════════════════════════════════
@@ -341,8 +335,8 @@ def executer_extraction():
             # "None" au lieu d'une chaîne vide. D'où le `or ""` ci-dessous sur
             # chaque champ concerné.
             resultats_finals.append({
-                "id":               id_texte,
-                "id_proleadfeeder":     doc.get("id"),       # identifiant texte du schéma "companies" (pas un int)
+                "id_proleadfeeder":               id_texte,
+                "id":     doc.get("id"),       # identifiant texte du schéma "companies" (pas un int)
                 "user_ionauth_id":  None,                # n'existe pas dans ce schéma
                 "NomSociete":       nom_societe,
                 "Siret":            str(doc.get("registerId") or "").strip(),  # ⚠️ SIREN, pas un vrai SIRET
@@ -472,26 +466,18 @@ def get_channel_videos(channel_url: str):
             entries = info.get("entries", []) or []
             count = len([e for e in entries if e])
             print(f"     {tab_label} → {count} entrées trouvées")
-            tab_count = 0  # 🔒 compteur de la limite MAX_VIDEOS_PER_TAB pour cet onglet
             for entry in entries:
-                if tab_count >= MAX_VIDEOS_PER_TAB:
-                    print(f"     {tab_label} → 🔒 limite de {MAX_VIDEOS_PER_TAB} vidéos atteinte, onglet suivant")
-                    break
                 if not entry: continue
                 if entry.get("_type") == "playlist":
                     for sub in entry.get("entries", []) or []:
-                        if tab_count >= MAX_VIDEOS_PER_TAB:
-                            break
                         if sub and sub.get("id") and len(sub.get("id", "")) == 11:
                             sub["tab"] = tab_key
                             all_entries.append(sub)
-                            tab_count += 1
                 else:
                     eid = entry.get("id", "")
                     if eid and len(eid) == 11:
                         entry["tab"] = tab_key
                         all_entries.append(entry)
-                        tab_count += 1
         except Exception: pass
     seen, videos = set(), []
     for entry in all_entries:
