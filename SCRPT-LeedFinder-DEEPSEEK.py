@@ -225,8 +225,8 @@ def executer_extraction():
         print(f"⚠️  Cookies introuvables : {CHEMIN_COOKIES}")
 
     resultats_finals = reparer_json_si_necessaire(FICHIER_SORTIE)
-    ids_deja_traites = {item["id"] for item in resultats_finals if "id" in item}
-
+    ids_deja_traites = {item["id_proleadfeeder"] for item in resultats_finals if "id_proleadfeeder" in item}
+    
     if ids_deja_traites:
         print(f"ℹ️  Reprise active : {len(ids_deja_traites)} documents déjà traités.")
 
